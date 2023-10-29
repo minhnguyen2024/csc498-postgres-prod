@@ -1,0 +1,63 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Room {
+  id Int @id @default(autoincrement())
+  accessible Int
+  power Int
+  reservable Int
+  softSeating Int
+  tableChairs Int
+  monitor Int 
+  whiteboard Int
+  window Int
+}
+
+model Block {
+  id Int @id @default(autoincrement())
+  room_id Int 
+  time Int
+  booked_user_id Int 
+  booked_time String
+} 
+
+
+model User {
+  id Int @id @default(autoincrement())
+  username String @unique
+  password String
+  accountBalance Float
+  admin Int
+}
+
+
+model Feature{
+  id Int @id @default(autoincrement())
+  featureName String
+  enabled Int
+}
+
+model CafeOrder{
+  id String @id @default(uuid())
+  userId Int
+  invId String
+  createdAt BigInt
+  orderStatus String
+  cafeRoyEmpId Int
+}
+
+model Inventory{
+  id String @id @default(uuid())
+  name String
+  iced Int
+  size String
+  image String
+  price Decimal
+  sold Int
+}
