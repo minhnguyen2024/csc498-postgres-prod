@@ -9,6 +9,7 @@ npx create-remix@latest --template remix-run/indie-stack
 ## Development
 
 - Initial setup:
+  Create .env file by changing .env.example to .env
 
   ```sh
   npm run setup

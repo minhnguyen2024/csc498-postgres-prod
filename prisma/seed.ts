@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 function seedUser() {
   users.forEach(
     async (item) =>
-      await prisma.$executeRaw`INSERT INTO User (id, username, password, accountBalance, admin) VALUES (${
+      await prisma.$executeRaw`INSERT INTO "User" ("id", "username", "password", "accountBalance", "admin") VALUES (${
         item.id
       }, ${item.username}, ${await bcrypt.hash(item.password, 10)}, 50.00, ${
         item.admin
@@ -26,7 +26,7 @@ function seedUser() {
 async function seedRoom() {
   for (let numRoom = 1; numRoom < 11; numRoom++) {
     await prisma.$executeRaw`
-    INSERT INTO Room (accessible, power, reservable,softSeating,tableChairs,monitor,whiteboard, window) VALUES (${getRandomInteger(
+    INSERT INTO "Room" ("accessible", "power", "reservable","softSeating","tableChairs","monitor","whiteboard", "window") VALUES (${getRandomInteger(
       0,
       1
     )}, ${getRandomInteger(0, 1)}, ${getRandomInteger(0,1)}, ${getRandomInteger(0, 1)}, ${getRandomInteger(0,1)}, ${getRandomInteger(0, 1)}, ${getRandomInteger(
@@ -40,7 +40,7 @@ async function seedRoom() {
 async function seedBlock() {
   for (let numRoom = 1; numRoom < 11; numRoom++) {
     for (let numBlock = 1; numBlock < 50; numBlock++) {
-      await prisma.$executeRaw`INSERT INTO Block (room_id, time, booked_user_id, booked_time) VALUES (${numRoom}, ${numBlock}, ${0}, "")`;
+      await prisma.$executeRaw`INSERT INTO "Block" ("room_id", "time", "booked_user_id", "booked_time") VALUES (${numRoom}, ${numBlock}, ${0}, 'blank')`;
     }
   }
   console.log(`Block table has been seeded. 🌱`);
@@ -49,7 +49,7 @@ async function seedBlock() {
 
 async function seedFeature() {
   for (let i = 0; i < features.length; i++) {
-    await prisma.$executeRaw`INSERT INTO Feature (id, featureName, enabled) VALUES (${features[i].id}, ${features[i].featureName}, ${features[i].enabled})`;
+    await prisma.$executeRaw`INSERT INTO "Feature" ("id", "featureName", "enabled") VALUES (${features[i].id}, ${features[i].featureName}, ${features[i].enabled})`;
   }
   console.log(`Feature table has been seeded. 🌱`);
 }
@@ -58,7 +58,7 @@ async function seedInventory(numReps: number) {
   for (let i = 0; i < inventory.length; i++) {
     for (let j = 0; j < numReps; j++) {
       await prisma.$executeRaw`
-      INSERT INTO Inventory (id, name, iced, size, image, price, sold) 
+      INSERT INTO "Inventory" ("id", "name", "iced", "size", "image", "price", "sold") 
       VALUES (${uuidv4()}, ${inventory[i].name}, ${inventory[i].iced}, ${
         inventory[i].size
       }, ${inventory[i].image}, ${inventory[i].price}, 0)`;
