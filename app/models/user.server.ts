@@ -7,16 +7,16 @@ import { prisma } from "~/db.server";
 export type { User } from "@prisma/client";
 
 export async function getUserById(id: number):Promise<User[]> {
-  return prisma.$queryRaw`SELECT * FROM User WHERE id = ${id}`;
+  return prisma.$queryRaw`SELECT * FROM "User" WHERE "id" = ${id}::integer`;
 }
 
 export async function getUserByUsername(username: string) {
-  return prisma.$queryRaw`SELECT * FROM User WHERE username = ${username}`;
+  return prisma.$queryRaw`SELECT * FROM "User" WHERE "username" = ${username}`;
 }
 
 export async function verifyLogin(username: string, password: string): Promise<User> {
   const existingUser: User[] =
-    await prisma.$queryRaw`SELECT * FROM User WHERE username = ${username}`;
+    await prisma.$queryRaw`SELECT * FROM "User" WHERE "username" = ${username}`;
   const userWithPassword = await prisma.user.findUnique({
     where: { username },
   });
@@ -47,12 +47,12 @@ export async function verifyLogin(username: string, password: string): Promise<U
 }
 
 export async function getAllUsers(): Promise<User[]> {
-  return await prisma.$queryRaw`SELECT * FROM User`;
+  return await prisma.$queryRaw`SELECT * FROM "User"`;
 }
 
 export async function getUserAccountBalanceByUserId({ userId }: { userId: number}): Promise<object>{
   return await prisma.$queryRaw`
-  SELECT accountBalance FROM User WHERE id = ${userId}
+  SELECT "accountBalance" FROM "User" WHERE "id" = ${userId}
   `
 }
 
@@ -67,7 +67,7 @@ export async function selectUsersBySearchQuery({
 }): Promise<User[]> {
   const usernameQuery: string = `%${username}%`;
   return await prisma.$queryRaw`
-  SELECT * FROM User 
+  SELECT * FROM "User" 
   WHERE 1 = 1
   ${userId == 0 ? Prisma.empty : Prisma.sql`AND id = ${userId}`}
   ${
@@ -90,15 +90,15 @@ export async function createUser({
 }): Promise<number> {
   const hashedPassword: string = await bcrypt.hash(password, 10);
   await prisma.$executeRaw`
-  INSERT INTO User(username, password, admin) 
+  INSERT INTO "User"("username", "password", "admin") 
   VALUES (${username}, ${hashedPassword}, ${permission})`;
-  const users: User[] = await prisma.$queryRaw`SELECT * FROM User WHERE username = ${username}`
+  const users: User[] = await prisma.$queryRaw`SELECT * FROM "User" WHERE "username" = ${username}`
   const user: User = users[0]
   return user.id
 }
 
 export async function deleteUser({ id }: { id: number }) {
-  return await prisma.$executeRaw`DELETE FROM User WHERE id = ${id}`;
+  return await prisma.$executeRaw`DELETE FROM "User" WHERE "id" = ${id}`;
 }
 
 export async function addFundToUserByUserId({ userId, amount}: { userId: number, amount: number}) {

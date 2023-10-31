@@ -18,7 +18,8 @@
     "typecheck": "tsc && tsc -p cypress",
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
     "seed-random-data": "ts-node --require tsconfig-paths/register prisma/seedRandomData.ts",
-    "docker": "docker-compose up -d"
+    "docker": "docker-compose up -d",
+    "unseed": "ts-node -r tsconfig-paths/register prisma/unseed.ts"
   },
   "prettier": {},
   "eslintIgnore": [

@@ -16,7 +16,7 @@ export async function loader({ request }: LoaderArgs) {
   //Example: 10 entries of time 1, 10 entries of time 2,...
   const blocks: Block[] = await getAllBlocks();
   const result: any[] = await getNumberOfRooms();
-  const numRooms: number = Number(result[0]["COUNT(*)"]);
+  const numRooms: number = Number(result[0].count);
 
   //return array of length = 49 (partitioned by 490 / 10 = 49)
   //each element is an array of 10 time blocks

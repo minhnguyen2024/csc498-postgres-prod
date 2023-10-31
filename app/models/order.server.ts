@@ -20,20 +20,18 @@ export async function selectOrderByUserId({
   userId: string;
 }): Promise<any[]> {
   return await prisma.$queryRaw`
-    SELECT CafeOrder.id AS orderId,
-    User.username AS customerName,
-    CafeOrder.orderStatus AS orderStatus,
-    CafeOrder.cafeRoyEmpId,
-    Inventory.name AS orderName,
-    Inventory.price AS price,
-    Inventory.size AS size,
-    Inventory.iced AS iced,
-    Inventory.image AS image
-    FROM CafeOrder, Inventory, User
-    WHERE CafeOrder.invId = Inventory.id
-    AND User.id = CafeOrder.userId
-    AND CafeOrder.userId = ${userId}
-  `;
+    SELECT "CafeOrder".id AS "orderId",
+    "User"."username" AS "customerName",
+    "CafeOrder"."orderStatus" AS "orderStatus",
+    "CafeOrder"."cafeRoyEmpId",
+    "Inventory"."name" AS "orderName",
+    "Inventory"."price" AS "price",
+    "Inventory"."size" AS "size",
+    "Inventory"."iced" AS "iced",
+    "Inventory"."image" AS "image"
+    FROM "CafeOrder" INNER JOIN "Inventory" ON "CafeOrder"."invId" = "Inventory"."id" 
+    INNER JOIN "User" ON "User"."id" = "CafeOrder"."userId"
+    AND "CafeOrder"."userId" = ${userId}::integer`;
 }
 
 export async function selectOrders() {
@@ -44,7 +42,7 @@ export async function selectOrders() {
   CafeOrder.orderStatus AS orderStatus,
   Inventory.id AS invId,
   Inventory.name AS orderName,
-  Inventory.iced AS temperature FROM CafeOrder, Inventory, User
+  Inventory.iced AS temperature FROM "CafeOrder", "Inventory", "User"
   WHERE CafeOrder.invId = Inventory.id
   AND User.id = CafeOrder.userId`;
 }
@@ -54,9 +52,9 @@ export async function selectAllInventoryByCondition({
   iced: number;
 }): Promise<Inventory[]> {
   return await prisma.$queryRaw`
-  SELECT name, iced, image
-  FROM Inventory 
-  WHERE iced = ${iced}
+  SELECT "name", "iced", "image"
+  FROM "Inventory" 
+  WHERE "iced" = ${iced}
   ORDER BY name ASC`;
 }
 
@@ -68,9 +66,9 @@ export async function selectInventoryByNameCondition({
   iced: number;
 }): Promise<Inventory[]> {
   return await prisma.$queryRaw`
-  SELECT * FROM Inventory 
-  WHERE iced = ${iced}
-  AND name = ${name}`;
+  SELECT * FROM "Inventory" 
+  WHERE "iced" = ${iced}
+  AND "name" = ${name}`;
 }
 
 export async function selectInventoryByNameConditionSize({
@@ -83,10 +81,10 @@ export async function selectInventoryByNameConditionSize({
   size: string;
 }): Promise<Inventory[]> {
   return await prisma.$queryRaw`
-  SELECT id AS invId, price FROM Inventory
-  WHERE iced = ${iced}
-  AND name = ${name}
-  AND size = ${size}`;
+  SELECT "id" AS invId, "price" FROM "Inventory"
+  WHERE "iced" = ${iced}
+  AND "name" = ${name}
+  AND "size" = ${size}`;
 }
 
 export async function createOrder({
@@ -102,7 +100,7 @@ export async function createOrder({
 }) {
   const orderId = uuidv4();
   await prisma.$executeRaw`
-  INSERT INTO CafeOrder (id, userId, invId, createdAt, orderStatus, cafeRoyEmpId) 
+  INSERT INTO "CafeOrder" ("id", "userId", "invId", "createdAt", "orderStatus", "cafeRoyEmpId") 
   VALUES (${orderId},${userId}, ${invId}, ${createdAt}, "notPrepared", 0)`;
 
   // const currentUserAccountBalance:number = await getUserAccountBalanceByUserId({ userId })
@@ -112,7 +110,7 @@ export async function createOrder({
   const newUserAccountBalance = currentUserAccountBalance - price;
 
   await prisma.$executeRaw`
-  UPDATE User SET accountBalance = ${newUserAccountBalance} WHERE id = ${userId}
+  UPDATE "User" SET "accountBalance" = ${newUserAccountBalance} WHERE "id" = ${userId}
   `;
   return orderId;
 }
@@ -125,7 +123,7 @@ export async function updateOrderAndInventory({
   invId: string;
   sold: number;
 }) {
-  await prisma.$executeRaw`UPDATE Inventory SET sold = ${sold} WHERE id = ${invId}`;
+  await prisma.$executeRaw`UPDATE "Inventory" SET "sold" = ${sold} WHERE "id" = ${invId}`;
 }
 
 //function to update prepare status
@@ -139,9 +137,9 @@ export async function updateOrderStatus({
   userId: number;
 }) {
   return await prisma.$executeRaw`
-  UPDATE CafeOrder 
-  SET orderStatus=${orderStatus}, cafeRoyEmpId=${userId}
-  WHERE id=${orderId}`;
+  UPDATE "CafeOrder" 
+  SET "orderStatus"=${orderStatus}, "cafeRoyEmpId"=${userId}
+  WHERE "id"=${orderId}`;
 }
 
 export async function createInventory({
@@ -159,14 +157,14 @@ export async function createInventory({
 }) {
   for (let i = 0; i < quantity; i++) {
     await prisma.$executeRaw`
-    INSERT INTO Inventory (id, name, iced, size, price) 
+    INSERT INTO "Inventory" ("id", "name", "iced", "size", "price") 
     VALUES (${uuidv4()}, ${name}, ${iced},${size}, ${price})`;
   }
   return null;
 }
 
 export async function selectAllInventory() {
-  return await prisma.$queryRaw`SELECT * FROM Inventory`;
+  return await prisma.$queryRaw`SELECT * FROM "Inventory"`;
 }
 
 export async function selectInventoryBySearchQuery({
@@ -190,12 +188,12 @@ export async function selectInventoryBySearchQuery({
   const queryResult: Inventory[] = await prisma.$queryRaw`
   SELECT * FROM Inventory 
   WHERE 1 = 1
-  ${invId == "" ? Prisma.empty : Prisma.sql`AND id LIKE ${invQuery}`}
-  ${name == "" ? Prisma.empty : Prisma.sql`AND name LIKE ${nameQuery}`}
-  ${size == "" ? Prisma.empty : Prisma.sql`AND size = ${size}`}
-  ${price == 0 ? Prisma.empty : Prisma.sql`AND price = ${price}`}
-  ${iced == -1 ? Prisma.empty : Prisma.sql`AND iced = ${iced}`}
-  ${sold == -1 ? Prisma.empty : Prisma.sql`AND sold = ${sold}`}
+  ${invId == "" ? Prisma.empty : Prisma.sql`AND "id" LIKE ${invQuery}`}
+  ${name == "" ? Prisma.empty : Prisma.sql`AND "name" LIKE ${nameQuery}`}
+  ${size == "" ? Prisma.empty : Prisma.sql`AND "size" = ${size}`}
+  ${price == 0 ? Prisma.empty : Prisma.sql`AND "price" = ${price}`}
+  ${iced == -1 ? Prisma.empty : Prisma.sql`AND "iced" = ${iced}`}
+  ${sold == -1 ? Prisma.empty : Prisma.sql`AND "sold" = ${sold}`}
   `;
   return queryResult;
 }
@@ -210,19 +208,19 @@ export async function getCafeOrderHistoryByUserId({
 }): Promise<any[]> {
   const orderListByUserId: any[] = await prisma.$queryRaw`
     SELECT 
-    CafeOrder.userId AS userId,
-    CafeOrder.invId AS invId,
-    CafeOrder.id AS orderId,
-    Inventory.name AS name, 
-    Inventory.iced AS iced,
-    Inventory.size AS size,
-    Inventory.price AS price
-    FROM CafeOrder, Inventory, User
-    WHERE CafeOrder.invId = Inventory.id
-    AND User.id = CafeOrder.userId
-    AND orderStatus = "finished" 
-    AND CafeOrder.userId = ${userId}
-    AND CafeOrder.createdAt > ${Date.now() - period}
+    "CafeOrder"."userId" AS "userId",
+    "CafeOrder"."invId" AS "invId",
+    "CafeOrder"."id" AS "orderId",
+    "Inventory"."name" AS "name", 
+    "Inventory"."iced" AS "iced",
+    "Inventory"."size" AS "size",
+    "Inventory"."price" AS "price"
+    FROM "CafeOrder" 
+    INNER JOIN "Inventory" ON "CafeOrder"."invId" = "Inventory"."id" 
+    INNER JOIN "User" ON "User"."id" = "CafeOrder"."userId"
+    AND "orderStatus" = 'finished'
+    AND "CafeOrder"."userId" = ${userId}::integer
+    AND "CafeOrder"."createdAt" > ${Date.now() - period}::integer
     `;
   return orderListByUserId;
 }
@@ -233,7 +231,7 @@ export async function isUserAllowedToPlaceOrder({
   userId: number;
 }): Promise<boolean> {
   const unfinishedOrders: CafeOrder[] = await prisma.$queryRaw`
-  SELECT * FROM CafeOrder WHERE userId = ${userId} AND orderStatus != "finished"
+  SELECT * FROM "CafeOrder" WHERE "userId" = ${userId} AND "orderStatus" <> 'finished'
   `;
   if (unfinishedOrders.length === 0) {
     return true;
